@@ -13,7 +13,7 @@ public:
 
 int main()
 {
-	std::ifstream file("C:/Users/User/Desktop/test.bmp", std::ios::in);
+	std::ifstream file("test.bmp", std::ios::in);
 
 	if(!file.is_open())
 	{

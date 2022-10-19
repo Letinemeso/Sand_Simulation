@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        BMP_Image.cpp \
         main.cpp
 
 HEADERS += \
