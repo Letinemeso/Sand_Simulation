@@ -18,3 +18,10 @@ void Utility::set_char_array_from_int(unsigned char* _arr, unsigned int _value, 
 	for(unsigned int i=0; i<_length; ++i)
 		_arr[i] = value_as_char[i];
 }
+
+unsigned int Utility::limited_rand(unsigned int _min, unsigned int _max)
+{
+	if(_max <= _min)
+		return 0;
+	return (rand() % (_max + 1 - _min)) + _min;
+}

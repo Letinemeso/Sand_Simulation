@@ -1,36 +1,21 @@
 #include <iostream>
 #include <fstream>
+#include <ctime>
 
 #include "Utility.h"
 #include "BMP_Image.h"
 #include "Image_Manager.h"
+#include "Sand_Simulation.h"
 
-class BMP_Manager
-{
-private:
-
-
-public:
-
-
-};
 
 int main()
 {
+	srand(time(nullptr));
+
 	Image_Manager im;
 
-//	BMP_Image* image = im.load_bmp("test_black_3x3.bmp");
-	BMP_Image* image = im.load_bmp("output.bmp");
-//	BMP_Image* image = new BMP_Image;
-//	image->generate(3, 2);
-
-	BMP_Image* real_image = im.load_bmp("test_wide.bmp");
-
-	for(unsigned int i=0; i<image->size(); ++i)
-	{
-		std::cout << (unsigned int)image->raw_data()[i] << "\t" << (unsigned int)real_image->raw_data()[i] << "\n";
-	}
-
+//	BMP_Image* image = im.load_bmp("input");
+	BMP_Image* image = im.load_bmp("test");
 
 	if(image == nullptr)
 	{
@@ -38,24 +23,55 @@ int main()
 		return 1;
 	}
 
-	for(unsigned int j=0; j<image->height(); ++j)
-	{
-		for(unsigned int i=0; i<image->width(); ++i)
-		{
-			BMP_Image::Pixel pixel = image->pixel(i, j);
 
-			std::cout << "x: " << i << "\ty: " << j << "\n" << (unsigned int)pixel.red << " " << (unsigned int)pixel.green << " " << (unsigned int)pixel.blue << '\n';
-		}
+
+
+
+	Sand_Simulation ss(image);
+
+	std::string file_name = "test_";
+	BMP_Image* scaled = im.scale_bmp(image, 10);
+	im.save_bmp(scaled, "Simulation/" + file_name + std::to_string(0));
+	delete image;
+	delete scaled;
+
+	unsigned int iteration = 0;
+	while(!ss.stable())
+	{
+		ss.update();
+		++iteration;
+
+		BMP_Image* ss_output = ss.state();
+
+		scaled = im.scale_bmp(ss_output, 10);
+		im.save_bmp(scaled, "Simulation/" + file_name + std::to_string(iteration));
+
+//		im.save_bmp(ss_output, "Simulation/" + file_name + std::to_string(iteration));
+
+		delete ss_output;
+		delete scaled;
 	}
 
-	BMP_Image::Pixel pixel = image->pixel(0, 2);
-	pixel.red = 128;
-	pixel.green = 0;
-	pixel.blue = 255;
 
-	im.save_bmp(image, "output.bmp");
 
-	delete image;
+
+//	for(unsigned int j=0; j<image->height(); ++j)
+//	{
+//		for(unsigned int i=0; i<image->width(); ++i)
+//		{
+//			bool need_to_paint = Utility::limited_rand(0, 1);
+//			if(!need_to_paint)
+//				continue;
+
+//			BMP_Image::Pixel pixel = image->pixel(i, j);
+
+//			unsigned int darkness = Utility::limited_rand(0, 125);
+
+//			pixel.red = Utility::limited_rand(250, 255) - darkness;
+//			pixel.green = Utility::limited_rand(250, 255) - darkness;
+//			pixel.blue = Utility::limited_rand(40, 60);
+//		}
+//	}
 
 	return 0;
 }

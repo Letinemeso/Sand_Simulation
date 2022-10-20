@@ -15,6 +15,14 @@ public:
 		Pixel(unsigned char& _red, unsigned char& _green, unsigned char& _blue) : red(_red), green(_green), blue(_blue) { }
 	};
 
+	struct Const_Pixel
+	{
+		const unsigned char& red;
+		const unsigned char& green;
+		const unsigned char& blue;
+		Const_Pixel(const unsigned char& _red, const unsigned char& _green, const unsigned char& _blue) : red(_red), green(_green), blue(_blue) { }
+	};
+
 public:
 	enum Data_Positions
 	{
@@ -44,6 +52,7 @@ private:
 
 public:
 	BMP_Image();
+	BMP_Image(const BMP_Image& _other);
 	~BMP_Image();
 
 public:
@@ -53,6 +62,7 @@ public:
 
 public:
 	Pixel pixel(unsigned int _x, unsigned int _y);
+	Const_Pixel pixel(unsigned int _x, unsigned int _y) const;
 	unsigned int size() const;
 	const unsigned char* raw_data() const;
 	unsigned int width() const;

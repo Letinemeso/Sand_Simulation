@@ -6,6 +6,20 @@ BMP_Image::BMP_Image()
 
 }
 
+BMP_Image::BMP_Image(const BMP_Image& _other)
+{
+	m_size = _other.m_size;
+	m_raw_data = new unsigned char[m_size];
+	for(unsigned int i = 0; i < m_size; ++i)
+		m_raw_data[i] = _other.m_raw_data[i];
+
+	m_pixel_array_offset = _other.m_pixel_array_offset;
+	m_width = _other.m_width;
+	m_height = _other.m_height;
+	m_pixel_array_size = _other.m_pixel_array_size;
+	m_padding_size = _other.m_padding_size;
+}
+
 BMP_Image::~BMP_Image()
 {
 	delete[] m_raw_data;
@@ -57,12 +71,12 @@ void BMP_Image::generate(unsigned int _width, unsigned int _height)
 	m_width = _width;
 	m_height = _height;
 
-	m_padding_size = 4 - (m_width % 3);
-	if(m_padding_size == 4)
-		m_padding_size = 0;
+	m_padding_size = /*4 - */(m_width % 4);
+//	if(m_padding_size == 4)
+//		m_padding_size = 0;
 
 	m_pixel_array_size = ((3 * m_width) + m_padding_size) * m_height;
-	m_pixel_array_offset = 102;
+	m_pixel_array_offset = 122;
 	m_size = m_pixel_array_size + m_pixel_array_offset;
 	unsigned int header_size = m_pixel_array_offset - 14;
 
@@ -103,6 +117,13 @@ BMP_Image::Pixel BMP_Image::pixel(unsigned int _x, unsigned int _y)
 	unsigned int offset = get_pixel_index_in_array(_x, _y);
 
 	return Pixel(m_raw_data[offset + 2], m_raw_data[offset + 1], m_raw_data[offset + 0]);
+}
+
+BMP_Image::Const_Pixel BMP_Image::pixel(unsigned int _x, unsigned int _y) const
+{
+	unsigned int offset = get_pixel_index_in_array(_x, _y);
+
+	return Const_Pixel(m_raw_data[offset + 2], m_raw_data[offset + 1], m_raw_data[offset + 0]);
 }
 
 unsigned int BMP_Image::size() const
