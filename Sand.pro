@@ -5,7 +5,11 @@ CONFIG -= qt
 
 SOURCES += \
         BMP_Image.cpp \
+        Image_Manager.cpp \
+        Utility.cpp \
         main.cpp
 
 HEADERS += \
-    BMP_Image.h
+    BMP_Image.h \
+    Image_Manager.h \
+    Utility.h
