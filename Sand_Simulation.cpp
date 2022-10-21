@@ -55,10 +55,12 @@ void Sand_Simulation::update()
 			bool sleft = is_stable_left(x, y);
 			bool sright = is_stable_right(x, y);
 
+			if(sleft && sright)
+				continue;
+
 			if(!sleft && !sright)
 			{
 				bool move_left = Utility::limited_rand(0, 1);
-//				bool move_left = false;
 				if(move_left)
 					move_grain(x, y, x - 1, y - 1);
 				else
@@ -72,6 +74,8 @@ void Sand_Simulation::update()
 			{
 				move_grain(x, y, x - 1, y - 1);
 			}
+
+			lower_grain_column(x, y + 1);
 		}
 	}
 }
@@ -90,6 +94,42 @@ void Sand_Simulation::move_grain(int _fx, int _fy, int _tx, int _ty)
 	if(_tx >= 0 && _tx < (int)m_width && _ty >= 0 && _ty < (int)m_height)
 		m_grid[_tx][_ty] = m_grid[_fx][_fy];
 	remove_grain(_fx, _fy);
+}
+
+void Sand_Simulation::lower_grain_column(int _x, int _fy)
+{
+	int y = _fy;
+	while(!m_grid[_x][y].is_empty() && y < (int)m_height)
+	{
+		bool sleft = is_stable_left(_x, y);
+		bool sright = is_stable_right(_x, y);
+
+		if(sleft && sright)
+		{
+			++y;
+			continue;
+		}
+
+		if(!sleft && !sright)
+		{
+			bool move_left = Utility::limited_rand(0, 1);
+			if(move_left)
+				move_grain(_x, y, _x - 1, y - 1);
+			else
+				move_grain(_x, y, _x + 1, y - 1);
+		}
+		else if(sleft && !sright)
+		{
+			move_grain(_x, y, _x + 1, y - 1);
+		}
+		else if(!sleft && sright)
+		{
+			move_grain(_x, y, _x - 1, y - 1);
+		}
+
+		++y;
+	}
+	remove_grain(_x, y - 1);
 }
 
 bool Sand_Simulation::is_stable_below(int _x, int _y) const

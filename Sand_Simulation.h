@@ -35,6 +35,7 @@ public:
 private:
 	void remove_grain(int _fx, int _fy);
 	void move_grain(int _fx, int _fy, int _tx, int _ty);
+	void lower_grain_column(int _x, int _fy);
 	bool is_stable_below(int _x, int _y) const;
 	bool is_stable_left(int _x, int _y) const;
 	bool is_stable_right(int _x, int _y) const;
