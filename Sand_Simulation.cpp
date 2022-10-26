@@ -1,25 +1,17 @@
 #include "Sand_Simulation.h"
 
 
-Sand_Simulation::Sand_Simulation(const BMP_Image* _initial_state)
+Sand_Simulation::Sand_Simulation(unsigned int _width, unsigned int _height)
 {
-	m_width = _initial_state->width();
-	m_height = _initial_state->height();
+	m_width = _width;
+	m_height = _height;
 
-	m_grid = new Grain * [m_width];
+	m_grid = new unsigned int * [m_width];
 	for(unsigned int i = 0; i < m_width; ++i)
-		m_grid[i] = new Grain[m_height];
-
-	for(unsigned int x = 0; x < m_width; ++x)
 	{
-		for(unsigned int y = 0; y < m_height; ++y)
-		{
-			BMP_Image::Const_Pixel px = _initial_state->pixel(x, y);
-
-			m_grid[x][y].red = px.red;
-			m_grid[x][y].green = px.green;
-			m_grid[x][y].blue = px.blue;
-		}
+		m_grid[i] = new unsigned int[m_height];
+		for(unsigned int j=0; j< m_height; ++j)
+			m_grid[i][j] = 0;
 	}
 }
 
@@ -34,147 +26,107 @@ Sand_Simulation::~Sand_Simulation()
 }
 
 
+void Sand_Simulation::set_grains_in_column(unsigned int _x, unsigned int _y, unsigned int _value)
+{
+	if(_x >= m_width || _y >= m_height)
+		return;
+	m_grid[_x][_y] = _value;
+}
+
+#include <iostream>
 
 void Sand_Simulation::update()
 {
 	m_stable = true;
 
-	for(unsigned int y = 0; y < m_height; ++y)
+	unsigned int** temp_grid = new unsigned int * [m_width];
+	for(unsigned int i = 0; i < m_width; ++i)
 	{
-		for(unsigned int x = 0; x < m_width; ++x)
+		temp_grid[i] = new unsigned int[m_height];
+		for(unsigned int j=0; j< m_height; ++j)
+			temp_grid[i][j] = 0;
+	}
+
+
+	for(int y = 0; y < (int)m_height; ++y)
+	{
+		for(int x = 0; x < (int)m_width; ++x)
 		{
-			if(m_grid[x][y].is_empty())
-				continue;
+			unsigned int current_count = m_grid[x][y];
 
-			if(!is_stable_below(x, y))
+			if(grain_can_slide_here(x - 1, y, current_count))
 			{
-				move_grain(x, y, x, y - 1);
-				continue;
+				++temp_grid[x - 1][y];
+				--current_count;
+				m_stable = false;
+			}
+			if(grain_can_slide_here(x + 1, y, current_count))
+			{
+				++temp_grid[x + 1][y];
+				--current_count;
+				m_stable = false;
+			}
+			if(grain_can_slide_here(x, y - 1, current_count))
+			{
+				++temp_grid[x][y - 1];
+				--current_count;
+				m_stable = false;
+			}
+			if(grain_can_slide_here(x, y + 1, current_count))
+			{
+				++temp_grid[x][y + 1];
+				--current_count;
+				m_stable = false;
 			}
 
-			bool sleft = is_stable_left(x, y);
-			bool sright = is_stable_right(x, y);
-
-			if(sleft && sright)
-				continue;
-
-			if(!sleft && !sright)
-			{
-				bool move_left = Utility::limited_rand(0, 1);
-				if(move_left)
-					move_grain(x, y, x - 1, y - 1);
-				else
-					move_grain(x, y, x + 1, y - 1);
-			}
-			else if(sleft && !sright)
-			{
-				move_grain(x, y, x + 1, y - 1);
-			}
-			else if(!sleft && sright)
-			{
-				move_grain(x, y, x - 1, y - 1);
-			}
-
-			lower_grain_column(x, y + 1);
+			temp_grid[x][y] += current_count;
 		}
 	}
-}
+
+	for(unsigned int i = 0; i < m_width; ++i)
+		delete[] m_grid[i];
+	delete[] m_grid;
+
+	m_grid = temp_grid;
 
 
+	//	debug
 
-void Sand_Simulation::remove_grain(int _fx, int _fy)
-{
-	m_stable = false;
+	unsigned int total_count = 0;
 
-	m_grid[_fx][_fy].set_empty();
-}
-
-void Sand_Simulation::move_grain(int _fx, int _fy, int _tx, int _ty)
-{
-	if(_tx >= 0 && _tx < (int)m_width && _ty >= 0 && _ty < (int)m_height)
-		m_grid[_tx][_ty] = m_grid[_fx][_fy];
-	remove_grain(_fx, _fy);
-}
-
-void Sand_Simulation::lower_grain_column(int _x, int _fy)
-{
-	int y = _fy;
-	while(!m_grid[_x][y].is_empty() && y < (int)m_height)
+	for(int y = (int)m_height - 1; y >= 0; --y)
 	{
-		bool sleft = is_stable_left(_x, y);
-		bool sright = is_stable_right(_x, y);
+		for(int x = 0; x < (int)m_width; ++x)
+		{
+			unsigned int current_count = m_grid[x][y];
 
-		if(sleft && sright)
-		{
-			++y;
-			continue;
-		}
+			std::cout << current_count << "\t";
 
-		if(!sleft && !sright)
-		{
-			bool move_left = Utility::limited_rand(0, 1);
-			if(move_left)
-				move_grain(_x, y, _x - 1, y - 1);
-			else
-				move_grain(_x, y, _x + 1, y - 1);
-		}
-		else if(sleft && !sright)
-		{
-			move_grain(_x, y, _x + 1, y - 1);
-		}
-		else if(!sleft && sright)
-		{
-			move_grain(_x, y, _x - 1, y - 1);
+			total_count += current_count;
 		}
 
-		++y;
+		std::cout << "\n\n";
 	}
-	remove_grain(_x, y - 1);
+
+	std::cout << "\n\n";
 }
 
-bool Sand_Simulation::is_stable_below(int _x, int _y) const
+
+
+bool Sand_Simulation::grain_can_slide_here(int _where_x, int _where_y, unsigned int _relative_to)
 {
-	if(_y == 0)
-		return true;
-
-	if(!m_grid[_x][_y - 1].is_empty())
-		return true;
-
-	return false;
-}
-
-bool Sand_Simulation::is_stable_left(int _x, int _y) const
-{
-	if(_y == 0)
-		return true;
-
-	if(_x == 0)
+	if(_where_x < 0 || _where_y < 0 || _where_x >= (int)m_width || _where_y >= (int)m_height)
 		return false;
 
-	if(!m_grid[_x - 1][_y].is_empty())
-		return true;
-
-	if(!m_grid[_x - 1][_y - 1].is_empty())
-		return true;
-
-	return false;
-}
-
-bool Sand_Simulation::is_stable_right(int _x, int _y) const
-{
-	if(_y == 0)
-		return true;
-
-	if(_x == (int)m_width - 1)
+	if(_relative_to < 4)
 		return false;
 
-	if(!m_grid[_x + 1][_y].is_empty())
-		return true;
-
-	if(!m_grid[_x + 1][_y - 1].is_empty())
+	if(m_grid[_where_x][_where_y] <= _relative_to - 4)
 		return true;
 
 	return false;
+
+//	return _relative_to >= 4;
 }
 
 
@@ -195,9 +147,36 @@ BMP_Image* Sand_Simulation::state() const
 		{
 			BMP_Image::Pixel px = img->pixel(x, y);
 
-			px.red = m_grid[x][y].red;
-			px.green = m_grid[x][y].green;
-			px.blue = m_grid[x][y].blue;
+			if(m_grid[x][y] == 0)
+			{
+				px.red = 255;
+				px.green = 255;
+				px.blue = 255;
+			}
+			else if(m_grid[x][y] == 1)
+			{
+				px.red = 0;
+				px.green = 255;
+				px.blue = 0;
+			}
+			else if(m_grid[x][y] == 2)
+			{
+				px.red = 125;
+				px.green = 0;
+				px.blue = 255;
+			}
+			else if(m_grid[x][y] == 3)
+			{
+				px.red = 255;
+				px.green = 255;
+				px.blue = 0;
+			}
+			else
+			{
+				px.red = 0;
+				px.green = 0;
+				px.blue = 0;
+			}
 		}
 	}
 
