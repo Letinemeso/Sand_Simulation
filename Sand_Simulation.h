@@ -23,6 +23,7 @@ public:
 	~Sand_Simulation();
 
 	void set_grains_in_column(unsigned int _x, unsigned int _y, unsigned int _value);
+	void setup_from_file(const std::string& _path);
 
 public:
 	void update();

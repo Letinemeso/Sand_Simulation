@@ -26,6 +26,10 @@ BMP_Image* Image_Manager::load_bmp(const std::string &_path)
 void Image_Manager::save_bmp(const BMP_Image *_img, const std::string &_path)
 {
 	std::ofstream output(_path + ".bmp", std::ios::trunc);
+
+	if(!output.is_open())
+		return;
+
 	for(unsigned int i=0; i<_img->size(); ++i)
 		output << _img->raw_data()[i];
 	output.close();

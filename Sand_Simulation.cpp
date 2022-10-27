@@ -33,7 +33,25 @@ void Sand_Simulation::set_grains_in_column(unsigned int _x, unsigned int _y, uns
 	m_grid[_x][_y] = _value;
 }
 
-#include <iostream>
+void Sand_Simulation::setup_from_file(const std::string& _path)
+{
+	std::ifstream file(_path, std::ios::in);
+
+	if(!file.is_open())
+		return;
+
+	unsigned int x = 0, y = 0, value = 0;
+
+	while(!file.eof())
+	{
+		file >> x >> y >> value;
+		set_grains_in_column(x, y, value);
+	}
+
+	file.close();
+}
+
+
 
 void Sand_Simulation::update()
 {
