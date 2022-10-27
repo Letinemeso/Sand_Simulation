@@ -1,6 +1,8 @@
 #ifndef SAND_SIMULATION_H
 #define SAND_SIMULATION_H
 
+#include <cmath>
+
 #include "Image_Manager.h"
 #include "BMP_Image.h"
 
@@ -27,6 +29,7 @@ public:
 
 private:
 	bool grain_can_slide_here(int _where_x, int _where_y, unsigned int _relative_to);
+	void expand_grid(unsigned int**& _grid, unsigned int& _width, unsigned int& _height, int _where_x, int _where_y) const;
 
 public:
 	bool stable() const;

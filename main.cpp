@@ -33,7 +33,7 @@ int main()
 	Sand_Simulation ss(5, 5);
 
 	ss.set_grains_in_column(1, 2, 1);
-	ss.set_grains_in_column(2, 2, 24);
+	ss.set_grains_in_column(2, 2, 100);
 	ss.set_grains_in_column(3, 2, 1);
 	ss.set_grains_in_column(2, 1, 1);
 	ss.set_grains_in_column(2, 3, 1);
