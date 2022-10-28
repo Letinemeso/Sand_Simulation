@@ -105,6 +105,8 @@ int main(int args_count, char** args)
 	}
 
 	unsigned int max_iterations = std::stoi(it->second);
+	if(max_iterations == 0)
+		max_iterations = -1;
 
 	//	frequency
 
@@ -121,70 +123,61 @@ int main(int args_count, char** args)
 
 	unsigned int frequency = std::stoi(it->second);
 
+	//
 
 
+	std::string file_name = "sand_";
 
-
-
-	std::string file_name = "test_";
-
-
-	Sand_Simulation ss(5, 5);
+	Sand_Simulation ss(width, height);
 	ss.setup_from_file(input_path);
 
-//	ss.set_grains_in_column(1, 2, 1);
-//	ss.set_grains_in_column(2, 2, 100);
-//	ss.set_grains_in_column(3, 2, 100);
-//	ss.set_grains_in_column(2, 1, 1);
-//	ss.set_grains_in_column(2, 3, 1);
-
-	BMP_Image* ss_output = ss.state();
-
-	BMP_Image* scaled = im.scale_bmp(ss_output, 50);
-	im.save_bmp(scaled, "Simulation/" + file_name + std::to_string(0));
-
-	delete ss_output;
-	delete scaled;
-//	BMP_Image* scaled = im.scale_bmp(image, 1);
-//	im.save_bmp(scaled, "Simulation/" + file_name + std::to_string(0));
-//	delete image;
-//	delete scaled;
-
-	unsigned int iteration = 0;
-	while(!ss.stable())
+	if(frequency == 0)
 	{
-		ss.update();
-		++iteration;
+		for(unsigned int i=0; i < max_iterations && !ss.stable(); ++i)
+			ss.update();
 
-		ss_output = ss.state();
+		BMP_Image* ss_output = ss.state();
 
-		scaled = im.scale_bmp(ss_output, 50);
-		im.save_bmp(scaled, "Simulation/" + file_name + std::to_string(iteration));
+		BMP_Image* scaled = im.scale_bmp(ss_output, 50);
+		im.save_bmp(scaled, output_path + '/' + file_name + "final");
 
 		delete ss_output;
 		delete scaled;
+
+		return 0;
 	}
 
+	for(unsigned int i=0; i < max_iterations && !ss.stable(); ++i)
+	{
+		if(i % frequency == 0)
+		{
+			BMP_Image* ss_output = ss.state();
 
+			BMP_Image* scaled = im.scale_bmp(ss_output, 50);
+			im.save_bmp(scaled, output_path + '/' + file_name + std::to_string(i));
 
+			delete ss_output;
+			delete scaled;
+		}
 
-//	for(unsigned int j=0; j<image->height(); ++j)
+		ss.update();
+	}
+
+//	unsigned int iteration = 0;
+//	while(!ss.stable())
 //	{
-//		for(unsigned int i=0; i<image->width(); ++i)
-//		{
-//			bool need_to_paint = Utility::limited_rand(0, 1);
-//			if(!need_to_paint)
-//				continue;
+//		BMP_Image* ss_output = ss.state();
 
-//			BMP_Image::Pixel pixel = image->pixel(i, j);
+//		BMP_Image* scaled = im.scale_bmp(ss_output, 50);
+//		im.save_bmp(scaled, output_path + '/' + file_name + std::to_string(iteration));
 
-//			unsigned int darkness = Utility::limited_rand(0, 125);
+//		delete ss_output;
+//		delete scaled;
 
-//			pixel.red = Utility::limited_rand(250, 255) - darkness;
-//			pixel.green = Utility::limited_rand(250, 255) - darkness;
-//			pixel.blue = Utility::limited_rand(40, 60);
-//		}
+//		ss.update();
+//		++iteration;
 //	}
+
 
 	return 0;
 }
