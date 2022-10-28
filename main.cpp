@@ -138,11 +138,9 @@ int main(int args_count, char** args)
 
 		BMP_Image* ss_output = ss.state();
 
-		BMP_Image* scaled = im.scale_bmp(ss_output, 50);
-		im.save_bmp(scaled, output_path + '/' + file_name + "final");
+		im.save_bmp(ss_output, output_path + '/' + file_name + "final");
 
 		delete ss_output;
-		delete scaled;
 
 		return 0;
 	}
@@ -153,31 +151,13 @@ int main(int args_count, char** args)
 		{
 			BMP_Image* ss_output = ss.state();
 
-			BMP_Image* scaled = im.scale_bmp(ss_output, 50);
-			im.save_bmp(scaled, output_path + '/' + file_name + std::to_string(i));
+			im.save_bmp(ss_output, output_path + '/' + file_name + std::to_string(i));
 
 			delete ss_output;
-			delete scaled;
 		}
 
 		ss.update();
 	}
-
-//	unsigned int iteration = 0;
-//	while(!ss.stable())
-//	{
-//		BMP_Image* ss_output = ss.state();
-
-//		BMP_Image* scaled = im.scale_bmp(ss_output, 50);
-//		im.save_bmp(scaled, output_path + '/' + file_name + std::to_string(iteration));
-
-//		delete ss_output;
-//		delete scaled;
-
-//		ss.update();
-//		++iteration;
-//	}
-
 
 	return 0;
 }
