@@ -208,10 +208,6 @@ void Sand_Simulation::expand_grid(unsigned int**& _grid, unsigned int& _width, u
 	if(_where_y < 0)
 		y_inc = abs(_where_y);
 
-//	for(unsigned int x = 0; x < new_width; ++x)
-//		for(unsigned int y = 0; y < new_height; ++y)
-//			new_grid[x][y] = _grid[x + x_inc][y + y_inc];
-
 	for(unsigned int x = x_inc; x < _width + x_inc; ++x)
 		for(unsigned int y = y_inc; y < _height + y_inc; ++y)
 			new_grid[x][y] = _grid[x - x_inc][y - y_inc];

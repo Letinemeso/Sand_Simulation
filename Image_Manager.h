@@ -9,9 +9,6 @@
 
 class Image_Manager final
 {
-private:
-
-
 public:
 	Image_Manager(){ }
 	~Image_Manager(){ }

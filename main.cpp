@@ -12,11 +12,7 @@
 
 int main(int args_count, char** args)
 {
-	srand(time(nullptr));
-
 	Image_Manager im;
-
-//	std::string args_test = "-v 12 --arg 123 --alalala lala -r 9";
 
 	std::string args_test;
 	for(int i=0; i<args_count; ++i)
@@ -93,35 +89,42 @@ int main(int args_count, char** args)
 
 	//	max iterations
 
+	unsigned int max_iterations = 0;
+
 	it = args_parsed.find("-m");
 	if(it == args_parsed.end())
 	{
 		it = args_parsed.find("--max-iter");
 		if(it == args_parsed.end())
-		{
-			std::cout << "-m or --max-iter is not found!\n";
-			return 1;
-		}
+			max_iterations = -1;
+		else
+			max_iterations = std::stoi(it->second);
+	}
+	else
+	{
+		max_iterations = std::stoi(it->second);
 	}
 
-	unsigned int max_iterations = std::stoi(it->second);
 	if(max_iterations == 0)
 		max_iterations = -1;
 
 	//	frequency
+
+	unsigned int frequency = 0;
 
 	it = args_parsed.find("-f");
 	if(it == args_parsed.end())
 	{
 		it = args_parsed.find("--freq");
 		if(it == args_parsed.end())
-		{
-			std::cout << "-f or --freq is not found!\n";
-			return 1;
-		}
+			frequency = 1;
+		else
+			frequency = std::stoi(it->second);
 	}
-
-	unsigned int frequency = std::stoi(it->second);
+	else
+	{
+		frequency = std::stoi(it->second);
+	}
 
 	//
 
