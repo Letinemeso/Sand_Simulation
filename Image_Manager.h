@@ -15,10 +15,10 @@ public:
 
 public:
 	BMP_Image* load_bmp(const std::string& _path);
-	void save_bmp(const BMP_Image* _img, const std::string& _path);
+	void save_bmp(const BMP_Image& _img, const std::string& _path);
 
 public:
-	BMP_Image* scale_bmp(const BMP_Image* _img, unsigned int _scale);
+	BMP_Image scale_bmp(const BMP_Image& _img, unsigned int _scale);
 
 };
 

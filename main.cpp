@@ -139,11 +139,9 @@ int main(int args_count, char** args)
 		for(unsigned int i=0; i < max_iterations && !ss.stable(); ++i)
 			ss.update();
 
-		BMP_Image* ss_output = ss.state();
+		BMP_Image ss_output = ss.state();
 
 		im.save_bmp(ss_output, output_path + '/' + file_name + "final");
-
-		delete ss_output;
 
 		return 0;
 	}
@@ -152,11 +150,9 @@ int main(int args_count, char** args)
 	{
 		if(i % frequency == 0)
 		{
-			BMP_Image* ss_output = ss.state();
+			BMP_Image ss_output = ss.state();
 
 			im.save_bmp(ss_output, output_path + '/' + file_name + std::to_string(i));
-
-			delete ss_output;
 		}
 
 		ss.update();

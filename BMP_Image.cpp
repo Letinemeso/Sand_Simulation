@@ -20,6 +20,25 @@ BMP_Image::BMP_Image(const BMP_Image& _other)
 	m_padding_size = _other.m_padding_size;
 }
 
+BMP_Image::BMP_Image(BMP_Image&& _other)
+{
+	m_size = _other.m_size;
+	_other.m_size = 0;
+	m_raw_data = _other.m_raw_data;
+	_other.m_raw_data = nullptr;
+
+	m_pixel_array_offset = _other.m_pixel_array_offset;
+	_other.m_pixel_array_offset = 0;
+	m_width = _other.m_width;
+	_other.m_width = 0;
+	m_height = _other.m_height;
+	_other.m_height = 0;
+	m_pixel_array_size = _other.m_pixel_array_size;
+	_other.m_pixel_array_size = 0;
+	m_padding_size = _other.m_padding_size;
+	_other.m_padding_size = 0;
+}
+
 BMP_Image::~BMP_Image()
 {
 	delete[] m_raw_data;

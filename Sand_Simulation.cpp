@@ -57,68 +57,70 @@ void Sand_Simulation::update()
 {
 	m_stable = true;
 
-	unsigned int ng_width = m_width;
-	unsigned int ng_height = m_height;
-
-	unsigned int** ng_grid = new unsigned int * [m_width];
-	for(unsigned int i = 0; i < m_width; ++i)
-	{
-		ng_grid[i] = new unsigned int[m_height];
-		for(unsigned int j=0; j< m_height; ++j)
-			ng_grid[i][j] = m_grid[i][j];
-	}
-
-	bool left_offset = false, right_offset = false, bottom_offset = false, top_offset = false;
+	bool expand_to_left = false, expand_to_right = false, expand_to_bottom = false, expand_to_top = false;
 
 	for(int y = 0; y < (int)m_height; ++y)
 	{
-		if(!left_offset)
+		if(grain_can_slide_here(-1, y, m_grid[0][y]))
 		{
-			if(grain_can_slide_here(-1, y, m_grid[0][y]))
-			{
-				expand_grid(ng_grid, ng_width, ng_height, -1, 0);
-				left_offset = true;
-			}
+			expand_to_left = true;
+			break;
 		}
-		if(!right_offset)
+	}
+	for(int y = 0; y < (int)m_height; ++y)
+	{
+		if(grain_can_slide_here(m_width, y, m_grid[m_width - 1][y]))
 		{
-			if(grain_can_slide_here(m_width, y, m_grid[m_width - 1][y]))
-			{
-				expand_grid(ng_grid, ng_width, ng_height, 1, 0);
-				right_offset = true;
-			}
+			expand_to_right = true;
+			break;
+		}
+	}
+
+	for(int x = 0; x < (int)m_width; ++x)
+	{
+		if(grain_can_slide_here(x, -1, m_grid[x][0]))
+		{
+			expand_to_bottom = true;
+			break;
 		}
 	}
 	for(int x = 0; x < (int)m_width; ++x)
 	{
-		if(!bottom_offset)
+		if(grain_can_slide_here(x, m_height, m_grid[x][m_height - 1]))
 		{
-			if(grain_can_slide_here(x, -1, m_grid[x][0]))
-			{
-				expand_grid(ng_grid, ng_width, ng_height, 0, -1);
-				bottom_offset = true;
-			}
-		}
-		if(!top_offset)
-		{
-			if(grain_can_slide_here(x, m_height, m_grid[x][m_height - 1]))
-			{
-				expand_grid(ng_grid, ng_width, ng_height, 0, 1);
-				top_offset = true;
-			}
+			expand_to_top = true;
+			break;
 		}
 	}
 
-	for(unsigned int i = 0; i < m_width; ++i)
-		delete[] m_grid[i];
-	delete[] m_grid;
+	if(expand_to_left || expand_to_right || expand_to_top || expand_to_bottom)
+	{
+		unsigned int ng_width = m_width + expand_to_left + expand_to_right;
+		unsigned int ng_height = m_height + expand_to_top + expand_to_bottom;
 
-	m_grid = ng_grid;
+		unsigned int** ng_grid = new unsigned int * [ng_width];
+		for(unsigned int x = 0; x < ng_width; ++x)
+		{
+			ng_grid[x] = new unsigned int[ng_height];
+			for(unsigned int y = 0; y < ng_height; ++y)
+				ng_grid[x][y] = 0;
+		}
 
-	m_height = ng_height;
-	m_width = ng_width;
+		for(unsigned int x = 0; x < m_width; ++x)
+			for(unsigned int y = 0; y < m_height; ++y)
+				ng_grid[x + expand_to_left][y + expand_to_bottom] = m_grid[x][y];
 
-	ng_grid = new unsigned int * [m_width];
+		for(unsigned int i = 0; i < m_width; ++i)
+			delete[] m_grid[i];
+		delete[] m_grid;
+
+		m_grid = ng_grid;
+
+		m_height = ng_height;
+		m_width = ng_width;
+	}
+
+	unsigned int** ng_grid = new unsigned int * [m_width];
 	for(unsigned int i = 0; i < m_width; ++i)
 	{
 		ng_grid[i] = new unsigned int[m_height];
@@ -167,9 +169,6 @@ void Sand_Simulation::update()
 	delete[] m_grid;
 
 	m_grid = ng_grid;
-
-	m_height = ng_height;
-	m_width = ng_width;
 }
 
 
@@ -188,39 +187,6 @@ bool Sand_Simulation::grain_can_slide_here(int _where_x, int _where_y, unsigned 
 	return false;
 }
 
-void Sand_Simulation::expand_grid(unsigned int**& _grid, unsigned int& _width, unsigned int& _height, int _where_x, int _where_y) const
-{
-	unsigned int new_width = _width + abs(_where_x);
-	unsigned int new_height = _height + abs(_where_y);
-
-	unsigned int** new_grid = new unsigned int * [new_width];
-	for(unsigned int i=0; i<new_width; ++i)
-	{
-		new_grid[i] = new unsigned int[new_height];
-		for(unsigned int j = 0; j < new_height; ++j)
-			new_grid[i][j] = 0;
-	}
-
-	unsigned int x_inc = 0;
-	if(_where_x < 0)
-		x_inc = abs(_where_x);
-	unsigned int y_inc = 0;
-	if(_where_y < 0)
-		y_inc = abs(_where_y);
-
-	for(unsigned int x = x_inc; x < _width + x_inc; ++x)
-		for(unsigned int y = y_inc; y < _height + y_inc; ++y)
-			new_grid[x][y] = _grid[x - x_inc][y - y_inc];
-
-	for(unsigned int i = 0; i < _width; ++i)
-		delete[] _grid[i];
-	delete[] _grid;
-
-	_grid = new_grid;
-	_width = new_width;
-	_height = new_height;
-}
-
 
 
 bool Sand_Simulation::stable() const
@@ -228,16 +194,16 @@ bool Sand_Simulation::stable() const
 	return m_stable;
 }
 
-BMP_Image* Sand_Simulation::state() const
+BMP_Image Sand_Simulation::state() const
 {
-	BMP_Image* img = new BMP_Image;
-	img->generate(m_width, m_height);
+	BMP_Image img;
+	img.generate(m_width, m_height);
 
 	for(unsigned int x = 0; x < m_width; ++x)
 	{
 		for(unsigned int y = 0; y < m_height; ++y)
 		{
-			BMP_Image::Pixel px = img->pixel(x, y);
+			BMP_Image::Pixel px = img.pixel(x, y);
 
 			if(m_grid[x][y] == 0)
 			{

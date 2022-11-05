@@ -53,6 +53,7 @@ private:
 public:
 	BMP_Image();
 	BMP_Image(const BMP_Image& _other);
+	BMP_Image(BMP_Image&& _other);
 	~BMP_Image();
 
 public:

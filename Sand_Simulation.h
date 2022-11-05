@@ -30,11 +30,10 @@ public:
 
 private:
 	bool grain_can_slide_here(int _where_x, int _where_y, unsigned int _relative_to);
-	void expand_grid(unsigned int**& _grid, unsigned int& _width, unsigned int& _height, int _where_x, int _where_y) const;
 
 public:
 	bool stable() const;
-	BMP_Image* state() const;
+	BMP_Image state() const;
 
 };
 
